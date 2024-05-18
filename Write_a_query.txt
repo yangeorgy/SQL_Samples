@@ -5,3 +5,211 @@ FROM Employees
 GROUP BY department_id
 ORDER BY total_salary DESC
 LIMIT 3;
+
+*****************************************************************************************************************
+
+Write a query to find employees who earn more than the average salary in their respective departments.
+
+SELECT e.name, e.salary, e.department_id
+FROM Employees e
+JOIN (
+    SELECT department_id, AVG(salary) AS avg_salary
+    FROM Employees
+    GROUP BY department_id
+) d ON e.department_id = d.department_id
+WHERE e.salary > d.avg_salary;
+
+*****************************************************************************************************************
+
+Write a query to find departments where the average salary of employees is greater than $60,000.
+
+SELECT department_id, AVG(salary) AS avg_salary
+FROM Employees
+GROUP BY department_id
+HAVING AVG(salary) > 60000;
+
+*****************************************************************************************************************
+
+Write a query to find employees who are in the same department as 'John Doe' but earn less than him.
+
+SELECT e.name, e.salary, e.department_id
+FROM Employees e
+WHERE e.department_id = (SELECT department_id FROM Employees WHERE name = 'John Doe')
+  AND e.salary < (SELECT salary FROM Employees WHERE name = 'John Doe');
+
+*****************************************************************************************************************
+
+Write a query to find the employee(s) with the highest salary in each department.
+
+WITH DeptMaxSalaries AS (
+    SELECT department_id, MAX(salary) AS max_salary
+    FROM Employees
+    GROUP BY department_id
+)
+SELECT e.name, e.salary, e.department_id
+FROM Employees e
+JOIN DeptMaxSalaries dms ON e.department_id = dms.department_id AND e.salary = dms.max_salary;
+
+*****************************************************************************************************************
+
+Write a query to find all employees who have been with the company for more than 5 years and have a salary higher than the average salary of the entire company.
+
+SELECT e.name, e.salary, e.join_date
+FROM Employees e
+WHERE DATEDIFF(YEAR, e.join_date, GETDATE()) > 5
+  AND e.salary > (SELECT AVG(salary) FROM Employees);
+
+*****************************************************************************************************************
+
+Write a query to find the names of employees who have never been managers.
+
+SELECT e.name
+FROM Employees e
+LEFT JOIN Employees m ON e.id = m.manager_id
+WHERE m.manager_id IS NULL;
+
+*****************************************************************************************************************
+
+Write a query to find the department with the highest average employee salary.
+
+SELECT department_id, AVG(salary) AS avg_salary
+FROM Employees
+GROUP BY department_id
+ORDER BY avg_salary DESC
+LIMIT 1;
+
+*****************************************************************************************************************
+
+Write a query to find the names of employees who earn more than any employee in the 'HR' department.
+
+SELECT e.name
+FROM Employees e
+WHERE e.salary > (SELECT MAX(salary) FROM Employees WHERE department = 'HR');
+
+*****************************************************************************************************************
+
+Write a query to list the names of employees who have the same salary as their manager.
+
+SELECT e.name AS Employee, m.name AS Manager, e.salary
+FROM Employees e
+JOIN Employees m ON e.manager_id = m.id
+WHERE e.salary = m.salary;
+
+*****************************************************************************************************************
+
+Write a query to find the departments with more than 5 employees who earn more than $50,000.
+
+SELECT department_id
+FROM Employees
+WHERE salary > 50000
+GROUP BY department_id
+HAVING COUNT(*) > 5;
+
+*****************************************************************************************************************
+
+Write a query to list the names of employees who have a higher salary than their manager.
+
+SELECT e.name
+FROM Employees e
+JOIN Employees m ON e.manager_id = m.id
+WHERE e.salary > m.salary;
+
+*****************************************************************************************************************
+
+Write a query to find departments where the total salary paid is more than $500,000.
+
+SELECT department_id, SUM(salary) AS total_salary
+FROM Employees
+GROUP BY department_id
+HAVING SUM(salary) > 500000;
+
+*****************************************************************************************************************
+
+Write a query to find the employees who have been with the company for more than 10 years and have the highest salary in their department.
+
+SELECT e.name, e.salary, e.department_id
+FROM Employees e
+WHERE DATEDIFF(YEAR, e.join_date, GETDATE()) > 10
+  AND e.salary = (SELECT MAX(salary) FROM Employees WHERE department_id = e.department_id);
+
+
+*****************************************************************************************************************
+
+Write a query to find employees who have the same name but different salaries.
+
+SELECT e1.name, e1.salary, e2.salary AS other_salary
+FROM Employees e1
+JOIN Employees e2 ON e1.name = e2.name AND e1.salary <> e2.salary;
+
+*****************************************************************************************************************
+
+Write a query to find the average salary for each job title.
+
+SELECT job_title, AVG(salary) AS avg_salary
+FROM Employees
+GROUP BY job_title;
+
+*****************************************************************************************************************
+
+Write a query to list employees along with their department name and manager name.
+
+SELECT e.name AS Employee, d.department_name, m.name AS Manager
+FROM Employees e
+JOIN Departments d ON e.department_id = d.id
+LEFT JOIN Employees m ON e.manager_id = m.id;
+
+*****************************************************************************************************************
+
+Write a query to find the maximum, minimum, and average salary of each department.
+
+SELECT department_id, MAX(salary) AS max_salary, MIN(salary) AS min_salary, AVG(salary) AS avg_salary
+FROM Employees
+GROUP BY department_id;
+
+*****************************************************************************************************************
+
+Write a query to find the names of employees who have never worked in the 'IT' department.
+
+SELECT name
+FROM Employees
+WHERE id NOT IN (SELECT employee_id FROM EmployeeHistory WHERE department_id = (SELECT id FROM Departments WHERE department_name = 'IT'));
+
+
+*****************************************************************************************************************
+
+Write a query to find the department with the highest number of employees earning more than $100,000.
+
+SELECT department_id
+FROM Employees
+WHERE salary > 100000
+GROUP BY department_id
+ORDER BY COUNT(*) DESC
+LIMIT 1;
+
+*****************************************************************************************************************
+
+Write a query to list employees who joined in the same month as their managers.
+
+SELECT e.name, e.join_date, m.name AS Manager, m.join_date AS Manager_Join_Date
+FROM Employees e
+JOIN Employees m ON e.manager_id = m.id
+WHERE MONTH(e.join_date) = MONTH(m.join_date) AND YEAR(e.join_date) = YEAR(m.join_date);
+
+
+****************************************************************************************************************
+
+Write a query to find the total number of employees and the total salary for each department, only for departments with more than 10 employees.
+
+SELECT department_id, COUNT(*) AS num_employees, SUM(salary) AS total_salary
+FROM Employees
+GROUP BY department_id
+HAVING COUNT(*) > 10;
+
+****************************************************************************************************************
+
+Write a query to find the average salary of employees for each year of joining.
+
+SELECT YEAR(join_date) AS join_year, AVG(salary) AS avg_salary
+FROM Employees
+GROUP BY YEAR(join_date)
+ORDER BY join_year;
