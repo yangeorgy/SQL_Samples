@@ -1,0 +1,7 @@
+Write a query to find the top 3 highest earning departments based on the total salary of their employees.
+
+SELECT department_id, SUM(salary) AS total_salary
+FROM Employees
+GROUP BY department_id
+ORDER BY total_salary DESC
+LIMIT 3;
